@@ -11,6 +11,16 @@ frontend/src/modulos/<clave>/  index.jsx ({ descripcion, Icono, menu, Rutas })
 
 ## Instalar para un cliente
 
+En Hetzner, todo de una vez (no pisa nada existente: revisa carpeta, PM2, puertos y sitio nginx):
+
+```
+./instalar.sh <instancia> <puerto_backend> <puerto_db> <puerto_web> "<Cliente>" "<#color>" "<modulos>" <email_admin> "<Nombre admin>"
+./deploy.sh <instancia>          # actualizaciones posteriores
+```
+Demo para leads: después de instalar, `sudo -u apps node src/scripts/demo_datos.js` en el backend de la instancia.
+
+A mano (local o en otro servidor):
+
 1. `cp backend/.env.example backend/.env` (solo si no existe) y llenar:
    - `CLIENTE_NOMBRE="Abarrotes La Esperanza"`, `CLIENTE_COLOR="#0F766E"` (con comillas: `#` es comentario en .env)
    - `MODULOS=pos` — módulos instalados, separados por coma
