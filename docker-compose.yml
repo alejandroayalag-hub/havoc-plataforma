@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: plataforma
+      POSTGRES_USER: plataforma_user
+      POSTGRES_PASSWORD: plataforma_pass
+    ports:
+      - "127.0.0.1:5449:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
