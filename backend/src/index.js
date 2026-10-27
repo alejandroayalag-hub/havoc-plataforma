@@ -37,8 +37,10 @@ app.get('/api/config', (req, res) => res.json({
 // Núcleo
 app.use('/api/usuarios', authMiddleware, require('./routes/usuarios'));
 
-// Módulos instalados: cada uno en /api/<clave>, solo para quien tenga acceso
+// Módulos instalados: cada uno en /api/<clave>, solo para quien tenga acceso.
+// Un módulo puede exponer rutas sin sesión (p. ej. dispositivos) en /api/<clave>/publico
 for (const m of modulos) {
+  if (m.publico) app.use(`/api/${m.clave}/publico`, m.publico);
   app.use(`/api/${m.clave}`, authMiddleware, requireModulo(m.clave), m.router);
 }
 

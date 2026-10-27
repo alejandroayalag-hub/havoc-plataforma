@@ -26,7 +26,7 @@ Permisos: el **admin** entra a todo; cada **usuario** solo a los módulos que el
 
 ## Crear un módulo
 
-- Backend: `backend/modulos/<clave>/index.js` exporta `{ nombre, router }`. Se monta en `/api/<clave>`
+- Backend: `backend/modulos/<clave>/index.js` exporta `{ nombre, router, publico? }` (`publico`: rutas sin sesión en `/api/<clave>/publico`, p. ej. dispositivos). Se monta en `/api/<clave>`
   ya protegido (sesión + acceso al módulo). Tablas con prefijo `<clave>_` en `migrations/NNN_*.sql`.
 - Frontend: `frontend/src/modulos/<clave>/index.jsx` exporta por defecto
   `{ descripcion, Icono, menu: [{ to, label }], Rutas }`. Se registra solo (no hay lista que editar).
@@ -36,4 +36,5 @@ Permisos: el **admin** entra a todo; cada **usuario** solo a los módulos que el
 
 | Clave | Módulo | Origen |
 |---|---|---|
+| `personal` | Personal: expedientes, 17 tipos de documento con formatos descargables, generador de contratos (4 tipos, .docx), pagos semanales desde PDF BBVA, checador biométrico (agente local con `x-api-key` en `/api/personal/publico/checador/*`) | HAVOC Control / Elys / RHATA |
 | `pos` | Punto de venta: vender con código de barras (pieza o granel), clientes, abrir/cerrar caja con corte, cancelaciones, inventario con entradas/ajustes/bitácora, proveedores, reportes de ganancia | POS farmacia de Gioval, generalizado |

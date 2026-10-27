@@ -2,7 +2,22 @@
 @import "tailwindcss";
 
 /* --acento lo fija la instancia (CLIENTE_COLOR) al cargar /api/config */
-:root { --acento: #7C3AED; }
+:root {
+  --acento: #7C3AED;
+  /* Variables que usan las pantallas heredadas de Elys/RHATA (módulo Personal) */
+  --color-accent:  var(--acento);
+  --color-primary: #F4F4F5;
+  --color-sage:    #E4E4E7;
+  --color-dark:    #18181B;
+  --color-cream:   #F4F4F5;
+}
+
+/* Los azules de las pantallas heredadas toman el color del cliente */
+@theme {
+  --color-blue-600: var(--acento);
+  --color-blue-700: var(--acento);
+  --color-blue-800: var(--acento);
+}
 
 body {
   margin: 0;
