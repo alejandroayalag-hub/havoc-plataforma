@@ -15,7 +15,7 @@ frontend/src/modulos/<clave>/  index.jsx ({ descripcion, Icono, menu, Rutas })
    - `CLIENTE_NOMBRE="Abarrotes La Esperanza"`, `CLIENTE_COLOR="#0F766E"` (con comillas: `#` es comentario en .env)
    - `MODULOS=pos` — módulos instalados, separados por coma
    - puertos, BD, `JWT_SECRET` (`openssl rand -hex 32`), `CORS_ORIGINS`
-2. `docker compose -p <cliente> up -d` · `cd backend && npm install && npm start` (aplica migraciones del núcleo y de cada módulo)
+2. `docker compose -p <cliente> --env-file backend/.env up -d` · `cd backend && npm install && npm start` (aplica migraciones del núcleo y de cada módulo)
 3. `node src/scripts/seed_admin.js dueño@cliente.com "Nombre"` → imprime contraseña temporal
 4. `cd frontend && npm install && npm run build` → servir `dist/` con Nginx y `/api` al backend
 

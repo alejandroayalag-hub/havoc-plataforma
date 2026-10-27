@@ -1,13 +1,15 @@
+# Una instalación = un proyecto compose: docker compose -p <instancia> --env-file backend/.env up -d
 services:
   postgres:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_DB: plataforma
-      POSTGRES_USER: plataforma_user
-      POSTGRES_PASSWORD: plataforma_pass
+      POSTGRES_DB: ${DB_NAME:?define DB_NAME en .env}
+      POSTGRES_USER: ${DB_USER:?define DB_USER en .env}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?define DB_PASSWORD en .env}
     ports:
-      - "127.0.0.1:5449:5432"
+      # solo localhost: el backend corre en el mismo host
+      - "127.0.0.1:${DB_PORT:?define DB_PORT en .env}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
 
