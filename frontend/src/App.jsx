@@ -39,12 +39,12 @@ function Layout() {
     <div className="min-h-screen flex flex-col">
       <nav className="bg-white border-b border-zinc-200 px-4 md:px-6 py-2 flex items-center gap-3 flex-wrap print:hidden">
         <NavLink to="/" className="font-bold mr-2" style={{ color: 'var(--acento)' }}>{config.nombre}</NavLink>
-        <div className="flex gap-1 flex-1 flex-wrap">
+        <div className="flex gap-1 basis-full order-last overflow-x-auto md:basis-0 md:flex-1 md:order-none md:flex-wrap">
           <NavItem to="/" end>Inicio</NavItem>
           {modulos.map(m => m.menu.map(i => <NavItem key={i.to} to={i.to} end={i.end}>{i.label}</NavItem>))}
           {esAdmin() && <NavItem to="/usuarios">Usuarios</NavItem>}
         </div>
-        <span className="text-xs text-zinc-500">{localStorage.getItem('nombre')}</span>
+        <span className="text-xs text-zinc-500 ml-auto md:ml-0">{localStorage.getItem('nombre')}</span>
         <button onClick={() => { cerrarSesion(); navigate('/login'); }}
                 className="text-xs border border-zinc-300 rounded px-2 py-1 hover:bg-zinc-100">Salir</button>
       </nav>
