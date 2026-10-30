@@ -24,6 +24,25 @@ const PRODUCTOS = [
   ['Tortilla de maíz', null, 'Básicos', 'kg', 18, 24, 12, 4],
 ];
 
+// PDF mínimo de una página con un texto, para documentos de ejemplo
+function pdfDeEjemplo(texto) {
+  const t = texto.normalize('NFD').replace(/[^\x20-\x7e]/g, '').replace(/[()\\]/g, '');
+  const contenido = `BT /F1 16 Tf 72 720 Td (${t}) Tj 0 -28 Td /F1 11 Tf (Documento de ejemplo - demo HAVOC) Tj ET`;
+  const objs = [
+    '<< /Type /Catalog /Pages 2 0 R >>',
+    '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
+    '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>',
+    `<< /Length ${contenido.length} >>\nstream\n${contenido}\nendstream`,
+    '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
+  ];
+  let out = '%PDF-1.4\n';
+  const offsets = objs.map((o, i) => { const off = out.length; out += `${i + 1} 0 obj\n${o}\nendobj\n`; return off; });
+  const xref = out.length;
+  out += `xref\n0 ${objs.length + 1}\n0000000000 65535 f \n${offsets.map(o => `${String(o).padStart(10, '0')} 00000 n \n`).join('')}`;
+  out += `trailer\n<< /Size ${objs.length + 1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`;
+  return Buffer.from(out, 'latin1');
+}
+
 async function main() {
   if (modulos.includes('pos')) {
     const { rows: [prov] } = await pool.query(
@@ -78,6 +97,33 @@ async function main() {
       }
     }
     console.log(`✓ Bitácora: ${VEHICULOS.length} vehículos de ejemplo`);
+  }
+  if (modulos.includes('expedientes')) {
+    const fs = require('fs');
+    const crypto = require('crypto');
+    const dir = path.join(__dirname, '..', '..', 'uploads', 'expedientes');
+    fs.mkdirSync(dir, { recursive: true });
+    const EXPEDIENTES = [
+      // número, título, cliente, materia, documentos
+      ['EXP-2026-014', 'Compraventa de terreno rústico', 'Familia Ortiz', 'Civil', ['Escritura antecedente.pdf', 'Identificaciones vendedores.pdf', 'Avalúo catastral.pdf']],
+      ['EXP-2026-021', 'Juicio ejecutivo mercantil — pagaré', 'Ferretería El Tornillo', 'Mercantil', ['Pagaré original (copia).pdf', 'Demanda inicial.pdf']],
+      ['EXP-2026-030', 'Constitución de sociedad', 'Aguacates del Valle', 'Corporativo', ['Acta constitutiva (borrador).pdf']],
+    ];
+    for (const [numero, titulo, cliente, materia, docs] of EXPEDIENTES) {
+      const { rows: [e] } = await pool.query(
+        `INSERT INTO expedientes_expedientes (numero, titulo, cliente, materia)
+         VALUES ($1, $2, $3, $4) ON CONFLICT (numero) DO NOTHING RETURNING id`, [numero, titulo, cliente, materia]);
+      if (!e) continue; // ya cargado
+      for (const nombre of docs) {
+        const archivo = `${crypto.randomUUID()}.pdf`;
+        const pdf = pdfDeEjemplo(`${numero} - ${nombre.replace(/\.pdf$/, '')}`);
+        fs.writeFileSync(path.join(dir, archivo), pdf);
+        await pool.query(
+          `INSERT INTO expedientes_documentos (expediente_id, nombre, ruta, tamano, subido_por) VALUES ($1, $2, $3, $4, 'Demo')`,
+          [e.id, nombre, archivo, pdf.length]);
+      }
+    }
+    console.log(`✓ Expedientes: ${EXPEDIENTES.length} expedientes de ejemplo`);
   }
   await pool.end();
 }
