@@ -68,7 +68,24 @@ async function main() {
          VALUES ($1, $2, $3, $4, $5, $6, CURRENT_DATE - 90) ON CONFLICT DO NOTHING`,
         [nombre, ap, puesto, curp, rfc, email]);
     }
-    console.log(`✓ Personal: ${EMPLEADOS.length} empleados de ejemplo`);
+    // Reloj checador con checadas de lunes a hoy (entrada ~8:55, salida ~17:05)
+    const { rows: [reloj] } = await pool.query(
+      `INSERT INTO personal_checadores (nombre, ubicacion, api_key)
+       SELECT 'Reloj entrada principal', 'Mostrador', md5(random()::text) || md5(random()::text)
+       WHERE NOT EXISTS (SELECT 1 FROM personal_checadores) RETURNING id`);
+    if (reloj) {
+      const { rows: emps } = await pool.query('SELECT id FROM personal_empleados ORDER BY id LIMIT 2');
+      for (const [i, { id }] of emps.entries()) {
+        await pool.query('INSERT INTO personal_checador_empleados (empleado_id, dispositivo_id, uid_checador) VALUES ($1, $2, $3)', [id, reloj.id, i + 1]);
+        await pool.query(
+          `INSERT INTO personal_checadas (empleado_id, dispositivo_id, uid_checador, "timestamp", tipo)
+           SELECT $1, $2, $3, (d::date + t.hora + make_interval(mins => (random() * 10)::int)) AT TIME ZONE 'America/Mexico_City', t.tipo
+           FROM generate_series(date_trunc('week', (NOW() AT TIME ZONE 'America/Mexico_City'))::date, (NOW() AT TIME ZONE 'America/Mexico_City')::date, '1 day') d,
+                (VALUES (time '08:50', 'entrada'), (time '17:00', 'salida')) t(hora, tipo)
+           WHERE (d::date + t.hora) < (NOW() AT TIME ZONE 'America/Mexico_City')`, [id, reloj.id, i + 1]);
+      }
+    }
+    console.log(`✓ Personal: ${EMPLEADOS.length} empleados de ejemplo con checador`);
   }
   if (modulos.includes('taller')) {
     const VEHICULOS = [

@@ -24,9 +24,11 @@ export default function ExpedientesPage() {
       </div>
       <div className="flex gap-2 mb-3">
         <input className={input} placeholder="Buscar por número, título, cliente o nombre de documento" value={q} onChange={e => setQ(e.target.value)} />
-        <select className={`${input} w-36`} value={estado} onChange={e => setEstado(e.target.value)}>
-          <option value="abierto">Abiertos</option><option value="cerrado">Cerrados</option><option value="">Todos</option>
-        </select>
+        <div className="w-36 shrink-0">
+          <select className={input} value={estado} onChange={e => setEstado(e.target.value)}>
+            <option value="abierto">Abiertos</option><option value="cerrado">Cerrados</option><option value="">Todos</option>
+          </select>
+        </div>
       </div>
       <div className={`${tarjeta} overflow-x-auto`}>
         <table className="w-full text-sm">

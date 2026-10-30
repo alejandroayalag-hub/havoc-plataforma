@@ -15,7 +15,7 @@ export default function BitacoraPage() {
     <div>
       <div className="flex items-center gap-3 mb-4">
         <h1 className="text-2xl font-bold flex-1">Bitácora de rondines</h1>
-        <input type="date" className={`${input} w-40`} value={fecha} max={hoy()} onChange={e => setFecha(e.target.value)} />
+        <div className="w-40 shrink-0"><input type="date" className={input} value={fecha} max={hoy()} onChange={e => setFecha(e.target.value)} /></div>
       </div>
       <p className="text-sm text-zinc-500 mb-3">Para registrar un paso, escanea el QR del punto con la cámara del celular.</p>
       <div className={`${tarjeta} overflow-x-auto`}>
