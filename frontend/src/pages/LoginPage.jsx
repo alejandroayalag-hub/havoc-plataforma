@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../api/client';
 import { useConfig } from '../App';
 import { guardarSesion } from '../sesion';
@@ -8,6 +8,7 @@ import { input, boton, Campo, errorDe } from '../ui';
 export default function LoginPage() {
   const config = useConfig();
   const navigate = useNavigate();
+  const de = useLocation().state?.de;
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -20,7 +21,7 @@ export default function LoginPage() {
     try {
       const { data } = await api.post('/auth/login', { email, password });
       guardarSesion(data);
-      navigate(data.debe_cambiar_password ? '/cambiar-password' : '/');
+      navigate(data.debe_cambiar_password ? '/cambiar-password' : de || '/');
     } catch (err) {
       setError(errorDe(err, 'No se pudo iniciar sesión'));
     } finally {

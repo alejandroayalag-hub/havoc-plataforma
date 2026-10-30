@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { BrowserRouter, Routes, Route, NavLink, Navigate, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, NavLink, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import api from './api/client';
 import { MODULOS } from './modulos';
 import { cerrarSesion, esAdmin, puedeEntrar } from './sesion';
@@ -29,7 +29,9 @@ function NavItem({ to, end, children }) {
 function Layout() {
   const config = useConfig();
   const navigate = useNavigate();
-  if (!localStorage.getItem('token')) return <Navigate to="/login" replace />;
+  const location = useLocation();
+  // Al volver del login regresa a donde iba (p. ej. el QR de un punto de rondín)
+  if (!localStorage.getItem('token')) return <Navigate to="/login" replace state={{ de: location.pathname + location.search }} />;
   if (localStorage.getItem('debe_cambiar_password') === 'true') return <Navigate to="/cambiar-password" replace />;
   const modulos = misModulos(config);
 

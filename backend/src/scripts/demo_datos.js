@@ -125,6 +125,30 @@ async function main() {
     }
     console.log(`✓ Expedientes: ${EXPEDIENTES.length} expedientes de ejemplo`);
   }
+  if (modulos.includes('rondines')) {
+    const PUNTOS = [
+      // nombre, descripción, lat, lng
+      ['Caseta de acceso', 'Entrada principal', 19.41612, -102.05189],
+      ['Bodega norte', 'Puerta trasera, junto al tablero eléctrico', 19.41671, -102.05142],
+      ['Estacionamiento', 'Esquina poniente', 19.41588, -102.05236],
+      ['Azotea', 'Cuarto de máquinas', 19.41630, -102.05170],
+    ];
+    const { rows: [{ n }] } = await pool.query('SELECT COUNT(*)::int AS n FROM rondines_puntos');
+    if (!n) {
+      for (const [nombre, descripcion, lat, lng] of PUNTOS) {
+        const { rows: [p] } = await pool.query(
+          'INSERT INTO rondines_puntos (nombre, descripcion) VALUES ($1, $2) RETURNING id', [nombre, descripcion]);
+        // Tres rondas de hoy, cada 2 horas desde hace 6 h
+        for (const horas of [6, 4, 2]) {
+          await pool.query(
+            `INSERT INTO rondines_registros (punto_id, usuario_nombre, lat, lng, precision_m, nota, created_at)
+             VALUES ($1, 'Guardia Pedro Ruiz', $2, $3, 8, $4, NOW() - make_interval(hours => $5) + make_interval(mins => $6))`,
+            [p.id, lat, lng, horas === 2 && nombre === 'Bodega norte' ? 'Puerta sin candado, se aseguró' : null, horas, PUNTOS.findIndex(x => x[0] === nombre) * 4]);
+        }
+      }
+    }
+    console.log(`✓ Rondines: ${PUNTOS.length} puntos de ejemplo`);
+  }
   await pool.end();
 }
 
