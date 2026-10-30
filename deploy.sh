@@ -12,7 +12,7 @@ echo "→ Construyendo frontend..."
 
 echo "→ Sincronizando backend completo..."
 rsync -az --delete --chown=apps:apps -e "$SSH" \
-  --exclude='node_modules/' --exclude='.env' \
+  --exclude='node_modules/' --exclude='.env' --exclude='uploads/' \
   "$ROOT_DIR/backend/" $SERVER:/home/apps/$INSTANCIA/backend/
 
 echo "→ Sincronizando frontend..."
