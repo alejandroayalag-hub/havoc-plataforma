@@ -51,6 +51,34 @@ async function main() {
     }
     console.log(`✓ Personal: ${EMPLEADOS.length} empleados de ejemplo`);
   }
+  if (modulos.includes('taller')) {
+    const VEHICULOS = [
+      // placas, marca, modelo, año, color, propietario, teléfono, servicios [días atrás, km, motivo, trabajos, costo, estado]
+      ['PZK-412-A', 'Nissan', 'Versa', 2019, 'Gris', 'Laura Méndez', '4521102030', [
+        [180, 62000, 'Servicio de 60,000 km', 'Cambio de aceite y filtros, rotación de llantas', 2350, 'entregado'],
+        [20, 68450, 'Ruido al frenar', 'Cambio de balatas delanteras y rectificado de discos', 1890, 'entregado'],
+      ]],
+      ['MNX-88-21', 'Chevrolet', 'Aveo', 2016, 'Blanco', 'Roberto Silva', '4529876543', [
+        [2, 121300, 'No enciende el aire acondicionado', 'Diagnóstico: fuga en compresor', 0, 'en_proceso'],
+      ]],
+      ['UAB-305-C', 'Volkswagen', 'Jetta', 2021, 'Negro', 'Transportes Uruapan', '4525550101', [
+        [0, 45210, 'Afinación mayor', null, 0, 'recibido'],
+      ]],
+    ];
+    for (const [placas, marca, modelo, anio, color, propietario, telefono, servicios] of VEHICULOS) {
+      const { rows: [v] } = await pool.query(
+        `INSERT INTO taller_vehiculos (placas, marca, modelo, anio, color, propietario, telefono)
+         VALUES ($1, $2, $3, $4, $5, $6, $7) ON CONFLICT (placas) DO NOTHING RETURNING id`,
+        [placas, marca, modelo, anio, color, propietario, telefono]);
+      if (!v) continue; // ya cargado
+      for (const [dias, km, motivo, trabajos, costo, estado] of servicios) {
+        await pool.query(
+          `INSERT INTO taller_servicios (vehiculo_id, fecha, kilometraje, motivo, trabajos, costo, estado)
+           VALUES ($1, CURRENT_DATE - $2::int, $3, $4, $5, $6, $7)`, [v.id, dias, km, motivo, trabajos, costo, estado]);
+      }
+    }
+    console.log(`✓ Bitácora: ${VEHICULOS.length} vehículos de ejemplo`);
+  }
   await pool.end();
 }
 
