@@ -16,7 +16,8 @@ const PORT = process.env.PORT || 3020;
 // Detrás de Nginx (1 hop): usar X-Forwarded-For para IP real en rate limiting.
 app.set('trust proxy', 1);
 
-app.use(helmet());
+// upgrade-insecure-requests rompe la página cuando el backend la sirve por http (caja sin internet)
+app.use(helmet({ contentSecurityPolicy: { directives: { upgradeInsecureRequests: null } } }));
 app.use(cors({
   origin: ['http://localhost:5173', ...(process.env.CORS_ORIGINS || '').split(',').map(s => s.trim()).filter(Boolean)],
   credentials: true,
@@ -42,6 +43,12 @@ app.use('/api/usuarios', authMiddleware, require('./routes/usuarios'));
 for (const m of modulos) {
   if (m.publico) app.use(`/api/${m.clave}/publico`, m.publico);
   app.use(`/api/${m.clave}`, authMiddleware, requireModulo(m.clave), m.router);
+}
+
+// Instalación sin internet (una caja, sin nginx): el backend sirve también el frontend.
+if (process.env.FRONTEND_DIST) {
+  app.use(express.static(process.env.FRONTEND_DIST));
+  app.get(/^(?!\/api).*/, (req, res) => res.sendFile(path.join(process.env.FRONTEND_DIST, 'index.html')));
 }
 
 app.use(errorHandler);
